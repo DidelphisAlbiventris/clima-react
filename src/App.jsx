@@ -1,53 +1,17 @@
-import { useEffect, useState } from "react";
+import useFetch from "./hooks/useFetch";
+import { useState } from "react";
 
 function App() {
   const [texto, setTexto] = useState("");
-  const [datos, setDatos] = useState([]);
-  const [cargando, setCargando] = useState(false);
-  const [error, setError] = useState(null);
 
-  useEffect(() => {
-    if (texto.length < 3) {
-      setDatos([]);
-      setCargando(false);
-      setError(null);
-      return;
-    }
+  const url =
+    texto.length >= 3
+      ? `https://geocoding-api.open-meteo.com/v1/search?name=${encodeURIComponent(
+          texto
+        )}&count=5&language=es`
+      : null;
 
-    const controller = new AbortController();
-
-    const buscar = async () => {
-      setCargando(true);
-      setError(null);
-
-      try {
-        const respuesta = await fetch(
-          `https://geocoding-api.open-meteo.com/v1/search?name=${encodeURIComponent(texto)}&count=5&language=es`,
-          { signal: controller.signal }
-        );
-
-        if (!respuesta.ok) {
-          throw new Error("Error en la petición");
-        }
-
-        const json = await respuesta.json();
-
-        setDatos(json.results ?? []);
-      } catch (error) {
-        if (error.name !== "AbortError") {
-          setError(error);
-        }
-      } finally {
-        setCargando(false);
-      }
-    };
-
-    buscar();
-
-    return () => {
-      controller.abort();
-    };
-  }, [texto]);
+  const { datos, cargando, error } = useFetch(url);
 
   return (
     <div>
@@ -59,11 +23,11 @@ function App() {
 
       {cargando && <p>Buscando...</p>}
 
-      {datos.length === 0 && texto.length >= 3 && !cargando && !error && (<p>No se encontraron coincidencias.</p>)}
+      {error && <p>Error: {error.message}</p>}
 
       <ul>
-        {datos.map((ciudad, index) => (
-          <li key={index}>
+        {datos.map((ciudad) => (
+          <li key={ciudad.id}>
             {ciudad.name}, {ciudad.admin1}, {ciudad.country}
           </li>
         ))}
