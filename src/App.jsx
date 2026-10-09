@@ -2,7 +2,7 @@ import { useState } from "react";
 import useFetch from "./hooks/useFetch";
 import { describirClima } from "./clima";
 
-
+// Pues la he liado con el commit anterior
 function App() {
   const [texto, setTexto] = useState("");
   const [ciudad, setCiudad] = useState(null);
