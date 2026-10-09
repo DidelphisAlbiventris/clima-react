@@ -2,6 +2,8 @@ import { useState } from "react";
 import useFetch from "./hooks/useFetch";
 import { describirClima } from "./clima";
 import { useMemo } from "react";
+import { useRef } from "react";
+import { useEffect } from "react";
 
 // Pues la he liado con el commit anterior
 function App() {
@@ -37,16 +39,29 @@ const resumen = useMemo(()=>{
 
    return { maxSemana, minSemana, diaCaluroso };
 
-}, pronostico);
+}, [pronostico]);
 
+const entrada = useRef(null);
 
+useEffect(()=>
+  {
+    entrada.current.focus();
+  }, []);
+
+  const limpiar = () => {
+    setTexto("");
+    setCiudad(null);
+    entrada.current.focus();
+  };
   return (
     <div>
       <input
+        ref={entrada}
         type="text"
         value={texto}
         onChange={(e) => setTexto(e.target.value)}
       />
+      <button onClick={limpiar}> Limpiar </button>
       {cargandoCiudades && <p>Buscando...</p>}
       {cargandoCiudades && <p>Buscando...</p>}
       {errorCiudades && <p>Error: {errorCiudades.message}</p>}
