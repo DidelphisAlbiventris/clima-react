@@ -1,6 +1,7 @@
 import { useState } from "react";
 import useFetch from "./hooks/useFetch";
 import { describirClima } from "./clima";
+import { useMemo } from "react";
 
 // Pues la he liado con el commit anterior
 function App() {
@@ -21,6 +22,22 @@ function App() {
 console.log("URL pronóstico:", urlPronostico);
   const {datos: pronostico, cargando: cargandoClima, error: errorClima } = useFetch(urlPronostico);
 
+
+const resumen = useMemo(()=>{
+  if(!pronostico || !pronostico.daily)
+    {
+      return null;
+    }
+
+    console.log("calculando resumen");
+    const {time, temperature_2m_max, temperature_2m_min} = pronostico.daily;
+    const maxSemana = Math.max(...temperature_2m_max);
+    const minSemana = Math.min(...temperature_2m_min);
+    const diaCaluroso = time[temperature_2m_max.indexOf(maxSemana)];
+
+   return { maxSemana, minSemana, diaCaluroso };
+
+}, pronostico);
 
 
   return (
@@ -56,6 +73,14 @@ console.log("URL pronóstico:", urlPronostico);
           <p>Condición: {""} {describirClima(pronostico.current.weather_code)}</p>
           <p>Viento: {pronostico.current.wind_speed_10m} km/h</p>
           <h3>Próximos 7 días</h3>
+
+          {resumen && (
+
+            <p> 
+              Maxixmo de la semana: {resumen.maxSemana}°C  Mínima:{" "} {resumen.minSemana} Dia mas Caluroso:{""} {resumen.diaCaluroso}
+            </p>
+          )}
+
           <div style={{ display: "flex", gap: "10px", flexWrap: "wrap" }}>
             {pronostico.daily.time.map((fecha, index) => (
               <div key={fecha} style={{ border: "1px solid #ddd", padding: "10px", borderRadius: "5px", minWidth: "120px" }}>
