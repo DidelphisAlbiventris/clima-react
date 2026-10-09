@@ -1,13 +1,13 @@
 import { useEffect, useState } from "react";
 
 export default function useFetch(url) {
-  const [datos, setDatos] = useState([]);
+  const [datos, setDatos] = useState(null);
   const [cargando, setCargando] = useState(false);
   const [error, setError] = useState(null);
 
   useEffect(() => {
     if (!url) {
-      setDatos([]);
+      setDatos(null);
       setError(null);
       setCargando(false);
       return;
@@ -18,7 +18,7 @@ export default function useFetch(url) {
     const buscar = async () => {
       setCargando(true);
       setError(null);
-
+      setDatos(null);
     try {
     const respuesta = await fetch(url, { signal: controller.signal });
 
@@ -27,13 +27,7 @@ export default function useFetch(url) {
     }
 
     const json = await respuesta.json();
-
-    if (!json.results || json.results.length === 0) {
-        setDatos([]);
-        throw new Error("No se encontró ninguna ciudad con ese nombre");
-    }
-
-    setDatos(json.results);
+    setDatos(json);
     } catch (err) {
     if (err.name !== "AbortError") {
         setError(err);
